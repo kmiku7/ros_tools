@@ -14,6 +14,9 @@ def get_parser():
     parser.add_argument(
         '-i', dest='input_bags', required=True, nargs='+', help='bags wanted be merged.'
     )
+    parser.add_argument(
+        '--lz4', dest='use_lz4', default=False, action='store_true', help='use LZ4 compression'
+    )
     return parser
 
 class MsgWrapper(object):
@@ -52,7 +55,13 @@ def main():
         in_bag = BagReaderWrapper(item)
         input_bags.append(in_bag)
 
-    out_bag = rosbag.Bag(args.output_bag, 'w')
+    write_options = {
+        'mode': 'w'
+    }
+    if args.use_lz4:
+        write_options['compression'] = 'lz4'
+
+    out_bag = rosbag.Bag(args.output_bag, **write_options)
     for wrapped_msg in heapq.merge(*input_bags):
         topic, msg, ts = wrapped_msg.get_original_message()
         out_bag.write(topic, msg, ts, raw=True)
