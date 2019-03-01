@@ -26,9 +26,9 @@ class MsgWrapper(object):
         self._ts = ts
     
     def __cmp__(self, other):
-        ret = self._ts.__cmp__(other.get_ts())
+        ret = cmp(self._ts, other.get_ts())
         if not ret:
-            return self._topic.__cmp__(other.get_topic)
+            return cmp(self._topic, other.get_topic())
         return ret
         
     def get_topic(self):
