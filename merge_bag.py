@@ -9,28 +9,34 @@ import rosbag
 def get_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        '-o', dest='output_bag', required=True, help='merged bag filename'
-    )
+        '-o', dest='output_bag', required=True, help='merged bag filename')
     parser.add_argument(
-        '-i', dest='input_bags', required=True, nargs='+', help='bags wanted be merged.'
-    )
+        '-i',
+        dest='input_bags',
+        required=True,
+        nargs='+',
+        help='bags wanted be merged.')
     parser.add_argument(
-        '--lz4', dest='use_lz4', default=False, action='store_true', help='use LZ4 compression'
-    )
+        '--lz4',
+        dest='use_lz4',
+        default=False,
+        action='store_true',
+        help='use LZ4 compression')
     return parser
+
 
 class MsgWrapper(object):
     def __init__(self, topic, msg, ts):
         self._topic = topic
         self._msg = msg
         self._ts = ts
-    
+
     def __cmp__(self, other):
         ret = cmp(self._ts, other.get_ts())
         if not ret:
             return cmp(self._topic, other.get_topic())
         return ret
-        
+
     def get_topic(self):
         return self._topic
 
@@ -40,17 +46,19 @@ class MsgWrapper(object):
     def get_original_message(self):
         return self._topic, self._msg, self._ts
 
+
 class BagReaderWrapper(object):
     def __init__(self, filepath):
         self._bag = rosbag.Bag(filepath, 'r')
-    
+
     def __iter__(self):
         for topic, msg, ts in self._bag.read_messages(raw=True):
             yield MsgWrapper(topic, msg, ts)
-    
+
     def close(self):
         self._bag.close()
         self._bag = None
+
 
 def main():
     parser = get_parser()
@@ -61,9 +69,7 @@ def main():
         in_bag = BagReaderWrapper(item)
         input_bags.append(in_bag)
 
-    write_options = {
-        'mode': 'w'
-    }
+    write_options = {'mode': 'w'}
     if args.use_lz4:
         write_options['compression'] = 'lz4'
 
@@ -75,6 +81,7 @@ def main():
 
     for bag in input_bags:
         bag.close()
+
 
 if __name__ == '__main__':
     main()
