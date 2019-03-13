@@ -41,7 +41,7 @@ def message_generator(msg_generator, window_size=255):
         while len(msg_wnd) < window_size and msg_generator:
             try:
                 topic, msg, t = msg_generator.next()
-                offset = msg[1][3]
+                offset = msg[3]
                 heapq.heappush(msg_wnd, (t, offset, topic, msg))
             except StopIteration:
                 msg_generator = None
